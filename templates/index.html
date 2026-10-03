@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureVote | Next-Gen AI Voting</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+    <style>
+        /* --- IOS CLEAN GLASS THEME (WHITISH) --- */
+        :root {
+            /* Apple-style soft mesh background */
+            --bg-gradient: radial-gradient(circle at 50% 0%, #ffffff 0%, #f2f4f6 100%);
+            --glass-surface: rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.9);
+            --blur: blur(25px);
+
+            /* Brand Colors from your screenshot */
+            --primary-dark: #1A2333; /* Dark Navy/Black for Register button */
+            --accent-blue: #007AFF;
+            --accent-orange: #F5A623; /* For the Steps icons */
+            --text-main: #1d1d1f;
+            --text-muted: #86868b;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        /* 1. Navbar (Glass Strip) */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            font-size: 1.4rem;
+            color: var(--primary-dark);
+        }
+        
+        .logo i { margin-right: 10px; color: var(--accent-blue); }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-muted);
+            margin-left: 30px;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover { color: var(--primary-dark); }
+        .nav-links .btn-nav {
+            background: var(--primary-dark);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-left: 20px;
+        }
+
+        /* 2. Hero Section */
+        .hero {
+            text-align: center;
+            padding: 80px 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(0, 122, 255, 0.1);
+            color: var(--accent-blue);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 3.8rem;
+            line-height: 1.1;
+            margin: 0 0 20px 0;
+            background: linear-gradient(135deg, #1A2333 0%, #4a5568 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+        }
+
+        p.subtitle {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 40px;
+            line-height: 1.6;
+        }
+
+        .hero-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 18px 40px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: var(--primary-dark);
+            color: white;
+            box-shadow: 0 10px 30px rgba(26, 35, 51, 0.2);
+        }
+
+        .btn-outline {
+            background: white;
+            border: 2px solid #e1e4e8;
+            color: var(--primary-dark);
+        }
+
+        .btn:hover { transform: translateY(-3px); }
+
+        /* 3. Center Graphic (Pulse) */
+        .scan-visual {
+            margin-top: 60px;
+            position: relative;
+            display: inline-block;
+        }
+        .scan-circle {
+            width: 120px;
+            height: 120px;
+            background: var(--primary-dark);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+            position: relative;
+            z-index: 2;
+        }
+        .pulse-ring {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            background: rgba(26, 35, 51, 0.1);
+            animation: pulse 2s infinite;
+            z-index: 1;
+        }
+        .pulse-ring:nth-child(2) { animation-delay: 0.5s; }
+
+        @keyframes pulse {
+            0% { width: 120px; height: 120px; opacity: 0.8; }
+            100% { width: 300px; height: 300px; opacity: 0; }
+        }
+
+        /* 4. Features Grid (Why Choose?) */
+        .section-title {
+            text-align: center;
+            margin-top: 100px;
+            margin-bottom: 50px;
+        }
+        .section-title h2 { font-size: 2.5rem; margin-bottom: 10px; }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            padding: 0 40px;
+            max-width: 1200px;
+            margin: 0 auto 100px;
+        }
+
+        .feature-card {
+            background: white;
+            border: 1px solid rgba(0,0,0,0.05);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.03);
+            transition: all 0.3s ease;
+        }
+        .feature-card:hover { transform: translateY(-5px); box-shadow: 0 20px 50px rgba(0,0,0,0.08); }
+
+        .icon-box {
+            width: 50px; height: 50px;
+            background: #f5f7fa;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--primary-dark);
+            margin-bottom: 20px;
+        }
+
+        /* Live Stats section CSS removed here */
+
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">
+            <i class="fas fa-vote-yea"></i> SecureVote
+        </div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="register.html">Register</a>
+            <a href="vote.html">Vote</a>
+            <a href="results.html" class="btn-nav">Results</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="badge">
+            <i class="fas fa-shield-alt"></i> Secure & Verified Voting Platform
+        </div>
+        
+        <h1>Your Vote, Your Voice,<br>Secured by AI</h1>
+        
+        <p class="subtitle">
+            Experience the future of democratic participation with our face recognition-powered voting system. Fast, secure, and completely transparent.
+        </p>
+        
+        <div class="hero-buttons">
+            <a href="register.html" class="btn btn-primary">
+                <i class="fas fa-user-plus"></i> Register Now
+            </a>
+            <a href="vote.html" class="btn btn-outline">
+                <i class="fas fa-vote-yea"></i> Cast Your Vote
+            </a>
+        </div>
+
+        <div class="scan-visual">
+            <div class="pulse-ring"></div>
+            <div class="pulse-ring"></div>
+            <div class="scan-circle">
+                <i class="fas fa-fingerprint"></i>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-title">
+        <h2>Why Choose SecureVote?</h2>
+        <p style="color:var(--text-muted)">Built with cutting-edge technology to ensure fair elections.</p>
+    </div>
+
+    <section class="features-grid">
+        <div class="feature-card">
+            <div class="icon-box"><i class="fas fa-expand-arrows-alt"></i></div>
+            <h3>Face Recognition</h3>
+            <p style="color:#666; font-size:0.95rem;">Advanced biometric verification ensures only registered voters can participate.</p>
+        </div>
+        <div class="feature-card">
+            <div class="icon-box"><i class="fas fa-shield-virus"></i></div>
+            <h3>Tamper Proof</h3>
+            <p style="color:#666; font-size:0.95rem;">Every vote is securely recorded with timestamp verification in Realtime DB.</p>
+        </div>
+        <div class="feature-card">
+            <div class="icon-box"><i class="fas fa-fingerprint"></i></div>
+            <h3>Unique Identity</h3>
+            <p style="color:#666; font-size:0.95rem;">Aadhaar-linked registration prevents duplicate voting attempts effectively.</p>
+        </div>
+        <div class="feature-card">
+            <div class="icon-box"><i class="fas fa-lock"></i></div>
+            <h3>End-to-End Security</h3>
+            <p style="color:#666; font-size:0.95rem;">Your vote remains confidential with high-level encrypted data storage.</p>
+        </div>
+    </section>
+
+    </body>
+</html>

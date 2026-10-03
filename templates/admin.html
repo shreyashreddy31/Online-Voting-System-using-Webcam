@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Election Results</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-gradient: radial-gradient(circle at 50% 0%, #ffffff 0%, #f2f4f6 100%);
+            --primary-dark: #1A2333;
+            --text-main: #1d1d1f;
+            --glass-surface: rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.9);
+            --blur: blur(25px);
+        }
+
+        body {
+            margin: 0; padding: 40px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        .container {
+            background: var(--glass-surface); backdrop-filter: var(--blur);
+            padding: 40px; border-radius: 30px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.05);
+            width: 90%; max-width: 600px;
+        }
+
+        h1 { text-align: center; margin-bottom: 40px; }
+
+        .party-row {
+            margin-bottom: 30px;
+            background: rgba(255,255,255,0.5);
+            padding: 20px; border-radius: 15px;
+            display: flex; flex-direction: column;
+        }
+
+        .party-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 10px; font-weight: 700; font-size: 1.2rem;
+        }
+
+        .bar-container {
+            width: 100%; height: 20px; background: #e5e5e5;
+            border-radius: 10px; overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%; width: 0%;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .bjp-bar { background: #F47216; }
+        .cong-bar { background: #00BFFF; }
+
+        .count-badge {
+            background: var(--primary-dark); color: white;
+            padding: 5px 15px; border-radius: 20px; font-size: 0.9rem;
+        }
+
+        .refresh-note {
+            text-align: center; margin-top: 30px;
+            color: #86868b; font-size: 0.9rem;
+        }
+        
+        .nav-back {
+            align-self: flex-start; margin-bottom: 20px;
+            text-decoration: none; color: var(--text-main); font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="nav-back"><i class="fas fa-chevron-left"></i> Back Home</a>
+
+    <div class="container">
+        <h1><i class="fas fa-chart-bar"></i> Live Results</h1>
+
+        <div class="party-row">
+            <div class="party-header">
+                <span><i class="fas fa-om" style="color:#F47216; margin-right:10px;"></i> BJP</span>
+                <span class="count-badge" id="bjp-count">0</span>
+            </div>
+            <div class="bar-container">
+                <div class="bar-fill bjp-bar" id="bjp-bar"></div>
+            </div>
+        </div>
+
+        <div class="party-row">
+            <div class="party-header">
+                <span><i class="fas fa-hand-paper" style="color:#00BFFF; margin-right:10px;"></i> Congress</span>
+                <span class="count-badge" id="cong-count">0</span>
+            </div>
+            <div class="bar-container">
+                <div class="bar-fill cong-bar" id="cong-bar"></div>
+            </div>
+        </div>
+        
+        <div class="party-row" style="text-align:center;">
+            <strong>Total Votes: <span id="total-votes">0</span></strong>
+        </div>
+
+        <p class="refresh-note"><i class="fas fa-sync fa-spin"></i> Updates automatically in real-time</p>
+    </div>
+
+    <script>
+        async function fetchResults() {
+            try {
+                const response = await fetch('/api/results');
+                const data = await response.json();
+                
+                const bjp = data.BJP || 0;
+                const cong = data.Congress || 0;
+                const total = (Object.values(data).reduce((a,b)=>a+b, 0));
+
+                document.getElementById('bjp-count').innerText = bjp;
+                document.getElementById('cong-count').innerText = cong;
+                document.getElementById('total-votes').innerText = total;
+
+                if (total > 0) {
+                    document.getElementById('bjp-bar').style.width = ((bjp / total) * 100) + "%";
+                    document.getElementById('cong-bar').style.width = ((cong / total) * 100) + "%";
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        setInterval(fetchResults, 2000);
+        fetchResults();
+    </script>
+</body>
+</html>

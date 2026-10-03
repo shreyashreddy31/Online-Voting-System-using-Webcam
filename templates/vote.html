@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vote | SecureVote</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-gradient: radial-gradient(circle at 50% 0%, #ffffff 0%, #f2f4f6 100%);
+            --primary-dark: #1A2333;
+            --danger-red: #FF3B30;
+            --text-main: #1d1d1f;
+            --glass-surface: rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.9);
+            --blur: blur(25px);
+        }
+
+        body {
+            margin: 0; padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+
+        .nav-back {
+            position: absolute; top: 30px; left: 30px;
+            text-decoration: none; color: var(--text-main); font-weight: 600;
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 20px; border-radius: 20px;
+            background: rgba(255,255,255,0.5); backdrop-filter: blur(10px);
+        }
+
+        .container {
+            background: var(--glass-surface); backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            padding: 50px 40px; border-radius: 30px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.05);
+            width: 90%; max-width: 480px; text-align: center;
+            max-height: 90vh; overflow-y: auto;
+        }
+
+        h2 { margin: 0 0 10px 0; font-size: 2.2rem; letter-spacing: -1px; }
+        p.desc { color: #86868b; margin-bottom: 40px; font-size: 1.1rem; }
+
+        .camera-box {
+            position: relative; 
+            width: 100%; height: 350px; background: #000; 
+            border-radius: 20px; overflow: hidden; margin-bottom: 25px; 
+            display: block; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        video { 
+            width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); 
+            display: block; position: absolute; top: 0; left: 0; z-index: 1;
+        }
+
+        .scan-overlay {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 200px; height: 200px; border: 4px solid #34C759; border-radius: 50%;
+            box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.4); z-index: 2;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .scan-overlay i { color: rgba(255,255,255,0.8); font-size: 3rem; opacity: 0.5; }
+
+        .security-alert {
+            background: rgba(255, 59, 48, 0.1); color: var(--danger-red);
+            border: 1px solid var(--danger-red); padding: 15px;
+            border-radius: 14px; margin-bottom: 20px; display: none;
+            font-weight: 600;
+        }
+
+        .btn {
+            width: 100%; padding: 18px; background: var(--primary-dark);
+            color: white; border: none; border-radius: 14px;
+            font-size: 1.1rem; font-weight: 600; cursor: pointer; margin-bottom: 10px;
+        }
+        .party-btn { padding: 15px; text-align: left; display: flex; align-items: center; gap: 15px; margin-bottom: 10px; }
+        .party-btn i { font-size: 1.5rem; width: 40px; text-align: center;}
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="nav-back"><i class="fas fa-chevron-left"></i> Home</a>
+
+    <div class="container">
+        
+        <div id="step-2">
+            <h2>Face Verification</h2>
+            <p class="desc" id="scan-status">Looking for registered face...</p>
+
+            <div class="security-alert" id="fraud-alert">
+                <i class="fas fa-ban"></i> BLOCKED: This face has already voted!
+            </div>
+
+            <div class="camera-box">
+                <video id="video" autoplay muted playsinline></video>
+                <canvas id="canvas" style="display:none;"></canvas>
+                <div class="scan-overlay" id="overlay-ring"><i class="fas fa-expand"></i></div>
+            </div>
+        </div>
+
+        <div id="step-3" style="display:none;">
+            <h2>Cast Your Vote</h2>
+            <p class="desc">Welcome, <span id="voter-name" style="font-weight:bold; color:black;"></span></p>
+
+            <button class="btn party-btn" style="background:#F47216;" onclick="submitVote('BJP')">
+                <i class="fas fa-om"></i> <div><strong>BJP</strong><br><small>Bharatiya Janata Party</small></div>
+            </button>
+            <button class="btn party-btn" style="background:#00BFFF;" onclick="submitVote('Congress')">
+                <i class="fas fa-hand-paper"></i> <div><strong>Congress</strong><br><small>Indian National Congress</small></div>
+            </button>
+            <button class="btn party-btn" style="background:#009F4D;" onclick="submitVote('AAP')">
+                <i class="fas fa-broom"></i> <div><strong>AAP</strong><br><small>Aam Aadmi Party</small></div>
+            </button>
+            <button class="btn party-btn" style="background:#DE2910;" onclick="submitVote('CPIM')">
+                <i class="fas fa-hammer"></i> <div><strong>CPI(M)</strong><br><small>Communist Party</small></div>
+            </button>
+            <button class="btn party-btn" style="background:#228B22;" onclick="submitVote('TMC')">
+                <i class="fas fa-seedling"></i> <div><strong>TMC</strong><br><small>All India Trinamool</small></div>
+            </button>
+            <button class="btn party-btn" style="background:#6c757d;" onclick="submitVote('Others')">
+                <i class="fas fa-user"></i> <div><strong>Others</strong><br><small>Independent</small></div>
+            </button>
+        </div>
+
+        <div id="step-4" style="display:none;">
+            <i class="fas fa-check-circle" style="font-size:4rem; color:#34C759; margin-bottom:20px;"></i>
+            <h2>Vote Recorded!</h2>
+            <p class="desc">Thank you for voting.</p>
+            <button class="btn" onclick="window.location.href='index.html'">Return Home</button>
+        </div>
+
+    </div>
+
+    <script>
+        let video = document.getElementById("video");
+        let canvas = document.getElementById("canvas");
+        let detectedAadhaar = "";
+
+        // Start Camera Automatically
+        navigator.mediaDevices.getUserMedia({ video: {} }).then(stream => {
+            video.srcObject = stream;
+            video.play();
+            startIdentification();
+        });
+
+        function startIdentification() {
+            canvas.width = 640;
+            canvas.height = 480;
+            const ctx = canvas.getContext('2d');
+
+            const interval = setInterval(async () => {
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const dataURL = canvas.toDataURL('image/jpeg');
+
+                try {
+                    const response = await fetch('/api/predict', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ image: dataURL })
+                    });
+                    const result = await response.json();
+
+                    if (result.status === 'success') {
+                        if (result.has_voted) {
+                            clearInterval(interval);
+                            document.getElementById("fraud-alert").style.display = "block";
+                            document.getElementById("overlay-ring").style.borderColor = "red";
+                            document.getElementById("scan-status").innerText = "ACCESS DENIED";
+                        } else {
+                            clearInterval(interval);
+                            detectedAadhaar = result.aadhaar;
+                            document.getElementById("voter-name").innerText = "Aadhaar: " + detectedAadhaar;
+                            document.getElementById("step-2").style.display = "none";
+                            document.getElementById("step-3").style.display = "block";
+                        }
+                    }
+                } catch (e) { console.error(e); }
+            }, 1000); // Check every 1 second
+        }
+
+        async function submitVote(party) {
+            await fetch('/api/vote', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ aadhaar: detectedAadhaar, party: party })
+            });
+            document.getElementById("step-3").style.display = "none";
+            document.getElementById("step-4").style.display = "block";
+        }
+    </script>
+</body>
+</html>
